@@ -36,6 +36,8 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+# [GET] /users
+
 @app.route('/user', methods=['GET'])
 def handle_hello():
     allusers = User.query.all()
@@ -50,12 +52,16 @@ def handle_favorites():
 
     return jsonify(favorites), 200
 
+# [GET] /people
+
 @app.route('/characters', methods=['GET'])
 def handle_characters():
     allcharacters = Characters.query.all()
     characters = list(map(lambda item: item.serialize(), allcharacters))
 
     return jsonify(characters), 200
+
+# [GET] /people/<int:people_id>
 
 @app.route('/character/<int:character_id>', methods=['GET'])
 def get_info_character(character_id):
@@ -65,6 +71,7 @@ def get_info_character(character_id):
 
     return jsonify(character.serialize()), 200
 
+# [GET] /planets
 
 @app.route('/planets', methods=['GET'])
 def handle_planets():
@@ -73,12 +80,15 @@ def handle_planets():
 
     return jsonify(planets), 200
 
+# [GET] /planets/<int:planet_id>
+
 @app.route('/planet/<int:planet_id>', methods=['GET'])
 def get_info_planet(planet_id):
 
     planet = Planets.query.filter_by(id=planet_id).first()
 
     return jsonify(planet.serialize()), 200
+
 
 @app.route('/vehicles', methods=['GET'])
 def handle_vehicles():
@@ -87,13 +97,68 @@ def handle_vehicles():
 
     return jsonify(vehicles), 200
 
+# [GET] /users/favorites
+
+@app.route('/user/<int:user_id>/favorites', methods=['GET'])
+def handle_favoritesuser(user_id):
+    favoritesuser = Favorites.query.filter_by(user_id=user_id).all()
+    favoritesselected = list(map(lambda item: item.serialize(), favoritesuser))
+
+    return jsonify(favoritesselected), 200
+
+# [POST] /user
+
 @app.route('/user', methods=['POST'])
 def add_user():
     allusers = User.query.all()
     results = list(map(lambda item: item.serialize(),allusers))
     request_body = json.loads(request.data)
     results.append(request_body)
-    return jsonify(results), 200
+    return jsonify(results), 201
+
+# [POST] /favorite/planet/<int:planet_id>
+
+@app.route('/favorite/user/<int:user_id>/planet/<int:planet_id>', methods=['POST'])
+def add_favorite_planet(user_id, planet_id):
+    user = User.query.filter_by(id=user_id).first()
+    planet = Planets.query.filter_by(id=planet_id).first()
+    favorite = Favorites(user_id=user.id, planets_favorites=planet.id)
+    db.session.add(favorite)
+    db.session.commit()
+    return jsonify(favorite.serialize()), 201
+
+# [POST] /favorite/people/<int:people_id>
+
+@app.route('/favorites/user/<int:user_id>/characters/<int:characters_id>', methods=['POST'])
+def add_favorite_character(user_id, characters_id):
+    user = User.query.filter_by(id=user_id).first()
+    characters = Characters.query.filter_by(id=characters_id).first()
+    favorite = Favorites(user_id=user.id, characters_favorites=characters.id)
+    db.session.add(favorite)
+    db.session.commit()
+    return jsonify(favorite.serialize()), 201
+
+# [DELETE] /favorite/planet/<int:planet_id>
+
+@app.route('/favorite/user/<int:user_id>/planet/<int:planet_id>', methods=['DELETE'])
+def delete_favorite_planet(user_id, planet_id):
+    favoriteplanet = Favorites.query.filter_by(user_id=user_id, planets_favorites=planet_id).first()
+    db.session.delete(favoriteplanet)
+    db.session.commit()
+
+    return jsonify("Done"), 200
+
+# [DELETE] /favorite/people/<int:people_id>
+
+@app.route('/favorite/user/<int:user_id>/characters/<int:characters_id>', methods=['DELETE'])
+def delete_favorite_character(user_id, characters_id):
+    favoritesch = Favorites.query.filter_by(user_id=user_id).filter_by(characters_favorites=characters_id).first()
+    db.session.delete(favoritesch)
+    db.session.commit()
+
+    return jsonify("Done"), 200
+
+
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=PORT, debug=False)

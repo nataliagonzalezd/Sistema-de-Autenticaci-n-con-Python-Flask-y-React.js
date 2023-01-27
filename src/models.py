@@ -25,12 +25,10 @@ class User(db.Model):
 
 class Favorites(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(250))
-    planets_Id = db.relationship('Planets', backref='Favorites',lazy=True)
-    vehicles_Id = db.relationship('Vehicles', backref='Favorites',lazy=True)
-    characters_Id = db.relationship('Characters', backref='Favorites',lazy=True)
-    user_Id = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
-
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
+    planets_favorites = db.Column(db.Integer, db.ForeignKey('planets.id'),nullable=True)
+    vehicles_favorites = db.Column(db.Integer, db.ForeignKey('vehicles.id'),nullable=True)
+    characters_favorites = db.Column(db.Integer, db.ForeignKey('characters.id'),nullable=True)
 
     def __repr__(self):
         return '<Favorites %r>' % self.id
@@ -38,18 +36,30 @@ class Favorites(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "name": self.name,
-            "user_Id": self.user_Id,
-            "planets_Id": self.planets_Id,
-            "vehicles_Id": self.vehicles_Id,
-            "characters_Id": self.characters_Id,
+            "user_id": self.user_id,
+            "planets_favorites": self.planets_favorites,
+            "vehicles_favorites": self.vehicles_favorites,
+            "characters_favorites": self.characters_favorites,
         }
 
 class Characters(db.Model):
-    id = db.Column(db.Integer, db.ForeignKey('favorites.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
-    url = db.Column(db.String(250))
-    # details_ID = db.relationship('CharactersDetails', backref='Characters',lazy=True)
+    height = db.Column(db.String(250))
+    mass = db.Column(db.String(250))
+    hairColor = db.Column(db.String(250))
+    skinColor = db.Column(db.String(250))
+    eyeColor = db.Column(db.String(250))
+    birthYear = db.Column(db.String(250))
+    gender = db.Column(db.String(250))
+    homeworld = db.Column(db.Integer,db.ForeignKey('planets.id')) 
+    films = db.Column(db.String(250))
+    species = db.Column(db.String(250))
+    vehiclespilots = db.Column(db.Integer, db.ForeignKey('vehicles.id'))
+    starships = db.Column(db.String(250))
+    created = db.Column(db.String(250))
+    edited = db.Column(db.String(250))
+    favorites = db.relationship('Favorites', backref='characters',lazy=True)
 
 
     def __repr__(self):
@@ -59,16 +69,37 @@ class Characters(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "url": self.url,
-            "details_ID": self.details_ID,
+            "height": self.height,
+            "mass": self.mass,
+            "haircolor": self.hairColor,
+            "skincolor": self.skinColor,
+            "eyecolor": self.eyeColor,
+            "birthyear": self.birthYear,
+            "gender": self.gender,
+            "homeworld": self.homeworld,
+            "films": self.films,
+            "species": self.species,
+            "vehicles": self.vehiclespilots,
+            "starships": self.starships,
+            "created": self.created,
+            "edited": self.edited,
         }
-
-
 class Planets(db.Model):
-    name = db.Column(db.String(250))
-    url = db.Column(db.String(250))
-    # details_ID = db.relationship('CharactersDetails', backref='Planets',lazy=True)
-    id = db.Column(db.Integer, db.ForeignKey('favorites.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(250),nullable=False)
+    favorites = db.relationship('Favorites', backref='planets',lazy=True)
+    climate = db.Column(db.String(250))
+    created = db.Column(db.String(250))
+    diameter = db.Column(db.String(250))
+    edited = db.Column(db.String(250))
+    films = db.Column(db.String(250))
+    gravity = db.Column(db.String(250))
+    orbitalperiod = db.Column(db.String(250))
+    population = db.Column(db.String(250))
+    residents = db.relationship('Characters', lazy='select', backref=db.backref('planets', lazy='joined'))
+    rotationperiod = db.Column(db.String(250))
+    surfacewater = db.Column(db.String(250))
+    terrain = db.Column(db.String(250))
 
 
     def __repr__(self):
@@ -78,17 +109,38 @@ class Planets(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "url": self.url,
-            "details_ID": self.details_ID,
+            "climate": self.climate,
+            "created": self.created,
+            "diameter": self.diameter,
+            "edited": self.edited,
+            "films": self.films,
+            "gravity": self.gravity,
+            "orbitalPeriod": self.orbitalperiod,
+            "population": self.population,
+            "rotationperiod": self.rotationperiod,
+            "surfacewater": self.surfacewater,
+            "terrain": self.terrain,
         }
 
 class Vehicles(db.Model):
-    id = db.Column(db.Integer, db.ForeignKey('favorites.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
-    url = db.Column(db.String(250))
-    # details_ID = db.relationship('CharactersDetails', backref='Vehicles',lazy=True)
+    favorites = db.relationship('Favorites', backref='Vehicles',lazy=True)
+    cargocapacity = db.Column(db.String(250))
+    consumables = db.Column(db.String(250))
+    costincredits = db.Column(db.String(250))
+    crew = db.Column(db.String(250))
+    edited = db.Column(db.String(250))
+    length = db.Column(db.String(250))
+    manufactured = db.Column(db.String(250))
+    maxatmspeed = db.Column(db.String(250))
+    model = db.Column(db.String(250))
+    passengers = db.Column(db.String(250))
+    pilots = db.relationship('Characters', lazy='select',
+        backref=db.backref('vehicles', lazy='joined'))
+    films = db.Column(db.String(250))
+    vehicleclass = db.Column(db.String(250))
 
-    
     def __repr__(self):
         return '<Vehicles %r>' % self.id
 
@@ -96,50 +148,16 @@ class Vehicles(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "url": self.url,
-            "details_ID": self.details_ID,
+            "cargocapacity": self.cargocapacity,
+            "consumables" : self.consumables,
+            "costincredits": self.costincredits,
+            "crew": self.crew,
+            "edited": self.edited,
+            "lenght": self.length,
+            "manufactered": self.manufactured,
+            "maxatmspeed": self.maxatmspeed,
+            "model": self.model,
+            "passengers": self.passengers,
+            "films": self.films,
+            "vehicleclass": self.vehicleclass,
         }
-
-# class CharactersDetails(db.Model):
-#     planets = db.Column(db.Integer, db.ForeignKey('planets.id'),nullable=True)
-#     vehicles = db.Column(db.Integer, db.ForeignKey('vehicles.id'),nullable=True)
-#     id = db.Column(db.Integer, db.ForeignKey('characters.id'), primary_key=True)
-#     height = db.Column(db.String(250))
-#     mass = db.Column(db.String(250))
-#     hairColor = db.Column(db.String(250))
-#     skinColor = db.Column(db.String(250))
-#     eyeColor = db.Column(db.String(250))
-#     birthYear = db.Column(db.String(250))
-#     gender = db.Column(db.String(250))
-#     homeworld = db.Column(db.String(250),db.ForeignKey('planets.url'))
-#     films = db.Column(db.String(250))
-#     species = db.Column(db.String(250))
-#     vehicles = db.Column(db.String(250), db.ForeignKey('vehicles.url'))
-#     starships = db.Column(db.String(250))
-#     created = db.Column(db.String(250))
-#     edited = db.Column(db.String(250))
-
-#     def __repr__(self):
-#         return '<CharactersDetails %r>' % self.id
-
-#     def serialize(self):
-#         return {
-#             "characters": self.characters,
-#             "planets": self.planets,
-#             "vehicles": self.vehicles,
-#             "id": self.id,
-#             "height": self.height,
-#             "mass": self.mass,
-#             "haircolor": self.hairColor,
-#             "skincolor": self.skinColor,
-#             "eyecolor": self.eyeColor,
-#             "birthyear": self.birthYear,
-#             "gender": self.gender,
-#             "homeworld": self.homeworld,
-#             "films": self.films,
-#             "species": self.species,
-#             "vehicles": self.vehicles,
-#             "starships": self.starships,
-#             "created": self.created,
-#             "edited": self.edited,
-#         }
