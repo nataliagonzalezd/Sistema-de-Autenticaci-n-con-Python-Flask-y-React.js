@@ -9,6 +9,10 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Favorites, Characters, Planets, Vehicles
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
 #from models import Person
 
 app = Flask(__name__)
@@ -25,6 +29,44 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+
+# Setup the Flask-JWT-Extended extension
+app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
+jwt = JWTManager(app)
+
+
+# Create a route to authenticate your users and return JWTs. The
+# create_access_token() function is used to actually generate the JWT.
+@app.route("/login", methods=["POST"])
+def login():
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
+
+    user = User.query.filter_by(userName=username, password=password).first()
+
+    if username != user.userName or password != user.password:
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token)
+
+
+@app.route("/profile", methods=["GET"])
+@jwt_required()
+def get_profile():
+
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(userName=current_user).first()
+    response_body ={
+        "msg":"ok", 
+        "user":user.serialize()
+        }
+
+    return jsonify(response_body), 200
+
+if __name__ == "__main__":
+    app.run()
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
