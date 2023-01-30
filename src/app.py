@@ -192,12 +192,17 @@ def delete_favorite_planet(user_id, planet_id):
 
 # [DELETE] /favorite/people/<int:people_id>
 
-@app.route('/favorite/user/<int:user_id>/characters/<int:characters_id>', methods=['DELETE'])
-def delete_favorite_character(user_id, characters_id):
-    favoritesch = Favorites.query.filter_by(user_id=user_id).filter_by(characters_favorites=characters_id).first()
-    db.session.delete(favoritesch)
-    db.session.commit()
-
+@app.route('/user/<int:user_id>/favorites/<int:characters_id>', methods=['DELETE'])
+def delete_favorite_character(user_id,characters_id):
+    request_body=request.json
+    print(request_body)
+    print(user_id)
+    query= Favorites.query.filter_by(user_id=user_id,characters_favorites=characters_id).first()
+    print(query)
+    if query is None:
+        return jsonify({"msg":"No hubo coincidencias, no hay nada para eliminar"}),404
+    db.session.delete(query)
+    db.session.commit() 
     return jsonify("Done"), 200
 
 
