@@ -150,7 +150,7 @@ def handle_favoritesuser(user_id):
 
 # [POST] /user
 
-@app.route('/user', methods=['POST'])
+@app.route('/signup', methods=['POST'])
 def add_user():
     allusers = User.query.all()
     results = list(map(lambda item: item.serialize(),allusers))
